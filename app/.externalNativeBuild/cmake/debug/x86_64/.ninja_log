@@ -1,0 +1,19 @@
+# ninja log v5
+2	368	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+368	482	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+3	362	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+362	474	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+202	4612	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+4612	8065	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+2	976	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+976	1100	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+2	852	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+852	1080	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+2	850	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+850	970	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+3	843	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+843	960	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+2	1035	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+1036	1213	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26
+2	1366	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	b4cb2e3042a0eda0
+1366	1940	0	../obj/x86_64/libnative-synthesizer-thread.so	681856a12cdffd26

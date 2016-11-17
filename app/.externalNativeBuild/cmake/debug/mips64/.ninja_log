@@ -1,0 +1,5 @@
+# ninja log v5
+0	1620	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	9cd79f1ed3d7e04c
+1621	1748	0	../obj/mips64/libnative-synthesizer-thread.so	ace9d0f6210f85bd
+2	516	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	5aa93549baa806e6
+516	656	0	../obj/mips64/libnative-synthesizer-thread.so	996c36d0f51266dd

@@ -1,0 +1,41 @@
+
+{
+	"buildFiles" : 
+	[
+		"C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/CMakeLists.txt"
+	],
+	"cleanCommands" : 
+	[
+		"C:\\Users\\Marvin\\AppData\\Local\\Android\\Sdk\\cmake\\3.6.3155560\\bin\\cmake.exe --build C:\\Users\\Marvin\\AndroidStudioProjects\\SynthesizerApp\\app\\.externalNativeBuild\\cmake\\release\\mips --target clean"
+	],
+	"cppFileExtensions" : [ "cpp" ],
+	"libraries" : 
+	{
+		"native-synthesizer-thread-Release-mips" : 
+		{
+			"abi" : "mips",
+			"artifactName" : "native-synthesizer-thread",
+			"buildCommand" : "C:\\Users\\Marvin\\AppData\\Local\\Android\\Sdk\\cmake\\3.6.3155560\\bin\\cmake.exe --build C:\\Users\\Marvin\\AndroidStudioProjects\\SynthesizerApp\\app\\.externalNativeBuild\\cmake\\release\\mips --target native-synthesizer-thread",
+			"buildType" : "release",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  -target mipsel-none-linux-android -gcc-toolchain C:/Users/Marvin/AppData/Local/Android/sdk/ndk-bundle/toolchains/mipsel-linux-android-4.9/prebuilt/windows-x86_64 --sysroot=C:/Users/Marvin/AppData/Local/Android/sdk/ndk-bundle/platforms/android-15/arch-mips  -Dnative_synthesizer_thread_EXPORTS -isystem C:\\Users\\Marvin\\AppData\\Local\\Android\\sdk\\ndk-bundle\\sources\\cxx-stl\\gnu-libstdc++\\4.9\\include -isystem C:\\Users\\Marvin\\AppData\\Local\\Android\\sdk\\ndk-bundle\\sources\\cxx-stl\\gnu-libstdc++\\4.9\\libs\\mips\\include -isystem C:\\Users\\Marvin\\AppData\\Local\\Android\\sdk\\ndk-bundle\\sources\\cxx-stl\\gnu-libstdc++\\4.9\\include\\backward  -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mips32 -Wa,--noexecstack -Wformat -Werror=format-security -fno-exceptions -fno-rtti -D__STDC_FORMAT_MACROS -std=c++11 -Wall -Werror -O2 -DNDEBUG  -fPIC    -c ",
+					"src" : "C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/src/main/cpp/native-synthesizer-thread.cpp",
+					"workingDirectory" : "C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/.externalNativeBuild/cmake/release/mips"
+				}
+			],
+			"output" : "C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/.externalNativeBuild/cmake/release/obj/mips/libnative-synthesizer-thread.so",
+			"toolchain" : "1129612563"
+		}
+	},
+	"toolchains" : 
+	{
+		"1129612563" : 
+		{
+			"cCompilerExecutable" : "C:/Users/Marvin/AppData/Local/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/bin/clang.exe",
+			"cppCompilerExecutable" : "C:/Users/Marvin/AppData/Local/Android/sdk/ndk-bundle/toolchains/llvm/prebuilt/windows-x86_64/bin/clang++.exe"
+		}
+	}
+}

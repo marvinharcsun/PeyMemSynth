@@ -1,0 +1,3 @@
+C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/.externalNativeBuild/cmake/release/x86/CMakeFiles/edit_cache.dir
+C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/.externalNativeBuild/cmake/release/x86/CMakeFiles/native-synthesizer-thread.dir
+C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/.externalNativeBuild/cmake/release/x86/CMakeFiles/rebuild_cache.dir

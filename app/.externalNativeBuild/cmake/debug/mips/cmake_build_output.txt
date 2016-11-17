@@ -1,0 +1,9 @@
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/Marvin/AndroidStudioProjects/SynthesizerApp/app/.externalNativeBuild/cmake/debug/mips
+CMake Warning:
+  Manually-specified variables were not used by the project:
+
+    ANDROID_ARM_NEON
+
+
