@@ -270,8 +270,6 @@ public class KnobView extends View {
 
   // Appearance and behavior parameters
   private final float textHeight_;
-  private final float arcWidth_ = 4.0f;
-  private final float startAngle_ = 36f;  // relative to bottom
   private final float strokeWidth_;
   private float sensitivity_;
   private String label_ = "labelg";

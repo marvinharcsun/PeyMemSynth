@@ -4,21 +4,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.group3.synthesizerapp.envelope.EnvelopeGraphListener;
-
-/**
- * Created by Marvin on 11/5/2016.
- */
 
 public class CustomSeekBar extends View {
-    //points for first Three Circles
+
 
     private Paint mPaint1;
     private Paint mPaint2;

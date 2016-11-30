@@ -1,12 +1,6 @@
 package com.group3.synthesizerapp;
-
-/**
- * Created by marvin on 9/10/16.
- */
-
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -47,51 +41,85 @@ public class MainActivity extends AppCompatActivity
     CustomSeekBar [] seekBars;
     KeyboardView keyboardView;
     ScrollStripView scrollStripView;
-    int parameterCounter;
-    int lastView = 0;
 
-    int playId;
-
-    PresetDataHelper mPDH;
-
+    PresetDataHelper pdh;
+    
     Button record;
-    Button stop;
     Button preset;
     Button play;
+    Button change_view;
 
-    ArrayList<String> spinnerItems;
-    Spinner spinner;
-
-
+    Button [] sub_views;
+    
+    ArrayList<String> presetList;
     ArrayAdapter<String> fileAdapter;
+    
+    Spinner presetSpinner;
     Spinner fileSpinner;
+    
+    MediaPlayer mp;
 
-    Toast toast;
-    int cView;
-    MediaPlayer mPlay;
+    Thread thread;
+    File wavDirectory;
+    File wavFile;
+
+    String wavDirectoryPath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/SynthesizerApp/";
 
     boolean isPlaying;
-    boolean isRecording = false;
-    boolean permissionGranted = false;
-    Thread thread;
+    boolean isRecording;
+    boolean permissionGranted;
+    
+    int xView;
+    int parameterCounter;
+    int lastView;
+    int playId;
+    int sampleRate;
 
-    int mSampleRate;
-    File mWavDirectory;
-    File mWavFile;
-    String mWavDirectoryPath = Environment.getExternalStorageDirectory().getAbsolutePath()+"/SynthesizerApp/";
+
+
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        isPlaying = false;
+        isRecording = false;
+        permissionGranted = false;
+
+        xView = 0;
+        parameterCounter = 100;
+        lastView = 0;
+        playId = 0;
+        sampleRate = 44100;
+
+
+
+
+
+        change_view = (Button) findViewById(R.id.change_view);
+        preset = (Button) findViewById(R.id.save_preset);
+        record = (Button) findViewById(R.id.record);
+        play = (Button) findViewById(R.id.play);
+
+        sub_views = new Button[5];
+        sub_views[0] = (Button) findViewById(R.id.mstr);
+        sub_views[1] = (Button) findViewById(R.id.op_0);
+        sub_views[2] = (Button) findViewById(R.id.op_1);
+        sub_views[3] = (Button) findViewById(R.id.op_2);
+        sub_views[4] = (Button) findViewById(R.id.op_3);
+
+
         thread = new Thread() {
             public void run() {
                 setPriority(Thread.MAX_PRIORITY);
                 if (Build.DEVICE.startsWith("generic")) {
                     System.out.println("Emulator detected...");
                     try {
-                        mSampleRate = 16000;
-                        startProcess(mSampleRate, 1024);
+                        sampleRate = 16000;
+                        startProcess(sampleRate, 1024);
                     } catch (UnsatisfiedLinkError e) {
                         System.err.println("function not found.\n" + e);
                         System.exit(1);
@@ -99,8 +127,8 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     System.out.println("Hardware detected...");
                     try {
-                        mSampleRate = 44100;
-                        startProcess(mSampleRate, 512);
+                        sampleRate = 44100;
+                        startProcess(sampleRate, 512);
                     } catch (UnsatisfiedLinkError e) {
                         System.err.println("function not found\n" + e);
                         System.exit(1);
@@ -110,232 +138,143 @@ public class MainActivity extends AppCompatActivity
         };
         thread.start();
 
-        mPDH = new PresetDataHelper(this);
+        pdh = new PresetDataHelper(this);
 
-        record = (Button) findViewById(R.id.record);
-        play = (Button) findViewById(R.id.play);
+
         checkPermissionForWrite();
         if (permissionGranted) {
-            mWavDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/SynthesizerApp");
+            wavDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/SynthesizerApp");
 
-            if (!mWavDirectory.exists()) {
-                mWavDirectory.mkdir();
+            if (!wavDirectory.exists()) {
+                wavDirectory.mkdir();
             }
 
         }
-        record.setOnClickListener(new View.OnClickListener() {
-            int c = 0;
-
-            @Override
-            public void onClick(View v) {
-                checkPermissionForWrite();
-
-                if (permissionGranted) {
-                    c ^= 1;
-                    if (c == 1) {
-                        if (!isRecording) {
-
-                            Toast.makeText(MainActivity.this,"Now recording.", Toast.LENGTH_SHORT).show();
-                            setRecord();
-                            isRecording = true;
-                        }
-                    } else {
-                        stopRecordJava();
-                    }
-                } else {
-
-                    Toast.makeText(MainActivity.this,"Check permissions.", Toast.LENGTH_SHORT).show();
-
-                }
-            }
-        });
-
-        if(mWavDirectory != null) {
-            play.setOnClickListener(new View.OnClickListener() {
-                int c = 0;
-
-                @Override
-                public void onClick(View v) {
-
-                    checkPermissionForWrite();
-                    if (permissionGranted) {
-                        c ^= 1;
-                        if (c == 1) {
-                            stopRecordJava();
-                            if (mWavDirectory.list().length == 0) {
-
-                                Toast.makeText(MainActivity.this,"Queue empty.", Toast.LENGTH_SHORT).show();
-
-                                c ^= 1;
-                                return;
-                            }
-
-                            Toast.makeText(MainActivity.this,"Now playing.", Toast.LENGTH_SHORT).show();
-                            mPlay = MediaPlayer.create(MainActivity.this, parse(mWavDirectoryPath + mWavDirectory.list()[playId]));
-                            mPlay.setLooping(true);
-                            mPlay.start();
-                            isPlaying = true;
-                        } else {
-
-                            Toast.makeText(MainActivity.this,"Now stopping.", Toast.LENGTH_SHORT).show();
-                            mPlay.setLooping(false);
-                            mPlay.stop();
-                            mPlay.release();
-                            isPlaying = false;
-                        }
-                    }
-                }
-            });
-        }
-        else
-        {
-
-            this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(),"Check permissions.", Toast.LENGTH_SHORT).show();
-                }
-            });
 
 
-        }
+        setupMenuButtons();
+        setupMidi();
+        setupKnobs();
+        setupSeekBarsAndSwitch();
+        xorView();
+        tabbedView();
+        setupSpinners();
 
-        parameterCounter = 100;
-
-
-        keyboardView = (KeyboardView) findViewById(R.id.kv);
-
-        keyboardView.setMidiListener(new MidiListener() {
-            Semaphore mutex = new Semaphore(1);
-
-            @Override
-            public void onNoteOff(int channel, int note, int velocity) {
-                try {
-                    mutex.acquire();
-                    try {
-
-                        setMidiMessage(0x80, note, velocity);
-                    } finally {
-                        mutex.release();
-                    }
-                } catch (InterruptedException e) {
-
-                }
-            }
-
-            @Override
-            public void onNoteOn(int channel, int note, int velocity) {
-                try {
-                    mutex.acquire();
-                    try {
-
-                        setMidiMessage(0x90, note, velocity);
-                    } finally {
-                        mutex.release();
-                    }
-                } catch (InterruptedException e) {
-
-                }
-            }
-        });
-
-        scrollStripView = (ScrollStripView) findViewById(R.id.ssv);
-        scrollStripView.bindKeyboard(keyboardView);
-
-        SetupKnobs();
-        SetupSeekBarsAndSwitch();
-        XORView();
-        TabbedView();
         findViewById(R.id.keyboard_layout).setVisibility(View.VISIBLE);
         findViewById(R.id.parameter_layout).setVisibility(View.INVISIBLE);
         defaultParameters();
 
+    }
 
-        spinnerItems = new ArrayList<String>();
-        spinner = (Spinner) findViewById(R.id.spinner);
-        spinnerItems.add("Default");
-        spinnerItems.add("Toy Piano");
-        spinnerItems.add("Pluck");
-        spinnerItems.add("Init");
-        ArrayList<String> presetNames = mPDH.getPresetNames();
-        for (int i = 0; i < presetNames.size(); i++) {
-            spinnerItems.add(presetNames.get(i));
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        defaultParameters();
+    }
+    @Override
+    protected void onResume() {
 
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, spinnerItems);
-        spinner.setAdapter(adapter);
+        super.onResume();
+    }
+    @Override
+    protected void onRestart() {
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch ((int) id) {
-                    case 0:
-                        defaultParameters();
-                        break;
-                    case 1:
-                        toyPianoParameters();
-                        break;
-                    case 2:
-                        pluckParameters();
-                        break;
-                    case 3:
-                        initParameters();
-                        break;
-                    default:
-                        float v[] = mPDH.getPresetValues(spinnerItems.get((int) id));
-                        for (int i = 0; i < 52; i++) {
-                            setParameterInterface(100 + i, v[i]);
-                        }
-                        break;
-                }
-            }
+        super.onRestart();
+    }
 
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        preset = (Button) findViewById(R.id.save_preset);
-
-
-        preset.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Date date = new Date();
-                String presetName = "CP_" + date.getTime();
-                float r[] = new float[52];
-                for (int i = 0; i < 52; i++) {
-                    r[i] = getParameter(i + 100);
-                }
-                mPDH.storePresetValue(presetName, r);
-                spinnerItems.add(presetName);
-            }
-        });
-
-
-        if (mWavDirectory != null){
-            fileSpinner = (Spinner) findViewById(R.id.file_spinner);
-            fileAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mWavDirectory.list());
-            fileSpinner.setAdapter(fileAdapter);
-            fileSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(isPlaying)
+        {
+            runOnUiThread(new Runnable() {
                 @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    playId = (int) (id);
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
+                public void run() {
+                    Toast.makeText(getApplicationContext(),"Now stopped.", Toast.LENGTH_SHORT).show();
                 }
             });
+            mp.setLooping(false);
+            mp.stop();
+            mp.release();
+        }
+        stopRecordJava();
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+    public void onDestroy() {
+        super.onDestroy();
+        stopProcess();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        thread = null;
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    permissionGranted = true;
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+    void checkPermissionForWrite()
+    {
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+                // Show an expanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }else{
+            permissionGranted = true;
         }
     }
 
 
 
-    public void defaultParameters()
+    void defaultParameters()
     {
         //Mods
 
@@ -404,7 +343,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void pluckParameters()
+    void pluckParameters()
     {
         //Mods
 
@@ -486,7 +425,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void toyPianoParameters()
+     void toyPianoParameters()
     {
         //Mods
 
@@ -568,7 +507,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void initParameters()
+    void initParameters()
     {
         //Mods
 
@@ -637,7 +576,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void stopRecordJava()
+     void stopRecordJava()
     {
         if (isRecording) {
 
@@ -648,25 +587,25 @@ public class MainActivity extends AppCompatActivity
                 Date date = new Date();
                 String filepath = Environment.getExternalStorageDirectory().getAbsolutePath();
                 String str = "/SynthesizerApp/SA_" + date.getTime() + ".wav";
-                mWavFile = new File(filepath + str);
-                FileOutputStream outputStream = new FileOutputStream(mWavFile);
-                PCMtoFile(outputStream, recordedData, mSampleRate, 2, 16);
+                wavFile = new File(filepath + str);
+                FileOutputStream outputStream = new FileOutputStream(wavFile);
+                PCMtoFile(outputStream, recordedData, sampleRate, 2, 16);
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            if (mWavDirectory != null){
-                fileAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, mWavDirectory.list());
+            if (wavDirectory != null){
+                fileAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, wavDirectory.list());
                 fileSpinner.setAdapter(fileAdapter);
-                playId = mWavDirectory.list().length-1;
+                playId = wavDirectory.list().length-1;
             }
 
             isRecording = false;
         }
     }
 
-    public void setParameterInterface(int id, float value)
+     void setParameterInterface(int id, float value)
     {
         switch (id)
         {
@@ -877,15 +816,215 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void XORView()
+
+    void setupSpinners()
     {
-        cView = 1;
+        presetList = new ArrayList<String>();
+        presetSpinner = (Spinner) findViewById(R.id.spinner);
+        presetList.add("Default");
+        presetList.add("Toy Piano");
+        presetList.add("Pluck");
+        presetList.add("Init");
+        ArrayList<String> presetNames = pdh.getPresetNames();
+        for (int i = 0; i < presetNames.size(); i++) {
+            presetList.add(presetNames.get(i));
+        }
+
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, presetList);
+        presetSpinner.setAdapter(adapter);
+
+        presetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch ((int) id) {
+                    case 0:
+                        defaultParameters();
+                        break;
+                    case 1:
+                        toyPianoParameters();
+                        break;
+                    case 2:
+                        pluckParameters();
+                        break;
+                    case 3:
+                        initParameters();
+                        break;
+                    default:
+                        float v[] = pdh.getPresetValues(presetList.get((int) id));
+                        for (int i = 0; i < 52; i++) {
+                            setParameterInterface(100 + i, v[i]);
+                        }
+                        break;
+                }
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+
+
+        if (wavDirectory != null){
+            fileSpinner = (Spinner) findViewById(R.id.file_spinner);
+            fileAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, wavDirectory.list());
+            fileSpinner.setAdapter(fileAdapter);
+            fileSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    playId = (int) (id);
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+        }
+    }
+
+    void setupMenuButtons()
+    {
+
+        record.setOnClickListener(new View.OnClickListener() {
+            int c = 0;
+
+            @Override
+            public void onClick(View v) {
+                checkPermissionForWrite();
+
+                if (permissionGranted) {
+                    c ^= 1;
+                    if (c == 1) {
+                        if (!isRecording) {
+
+                            Toast.makeText(MainActivity.this,"Now recording.", Toast.LENGTH_SHORT).show();
+                            setRecord();
+                            isRecording = true;
+                        }
+                    } else {
+                        stopRecordJava();
+                    }
+                } else {
+
+                    Toast.makeText(MainActivity.this,"Check permissions.", Toast.LENGTH_SHORT).show();
+
+                }
+            }
+        });
+
+
+        if(wavDirectory != null) {
+            play.setOnClickListener(new View.OnClickListener() {
+                int c = 0;
+
+                @Override
+                public void onClick(View v) {
+
+                    checkPermissionForWrite();
+                    if (permissionGranted) {
+                        c ^= 1;
+                        if (c == 1) {
+                            stopRecordJava();
+                            if (wavDirectory.list().length == 0) {
+
+                                Toast.makeText(MainActivity.this,"Queue empty.", Toast.LENGTH_SHORT).show();
+
+                                c ^= 1;
+                                return;
+                            }
+
+                            Toast.makeText(MainActivity.this,"Now playing.", Toast.LENGTH_SHORT).show();
+                            mp = MediaPlayer.create(MainActivity.this, parse(wavDirectoryPath + wavDirectory.list()[playId]));
+                            mp.setLooping(true);
+                            mp.start();
+                            isPlaying = true;
+                        } else {
+
+                            Toast.makeText(MainActivity.this,"Now stopping.", Toast.LENGTH_SHORT).show();
+                            mp.setLooping(false);
+                            mp.stop();
+                            mp.release();
+                            isPlaying = false;
+                        }
+                    }
+                }
+            });
+        }
+        else
+        {
+            Toast.makeText(MainActivity.this,"Check permissions.", Toast.LENGTH_SHORT).show();
+        }
+
+        preset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Date date = new Date();
+                String presetName = "CP_" + date.getTime();
+                float r[] = new float[52];
+                for (int i = 0; i < 52; i++) {
+                    r[i] = getParameter(i + 100);
+                }
+                pdh.storePresetValue(presetName, r);
+                presetList.add(presetName);
+            }
+        });
+    }
+
+     void setupMidi()
+    {
+        keyboardView = (KeyboardView) findViewById(R.id.kv);
+
+        keyboardView.setMidiListener(new MidiListener() {
+            Semaphore mutex = new Semaphore(1);
+
+            @Override
+            public void onNoteOff(int channel, int note, int velocity) {
+                try {
+                    mutex.acquire();
+                    try {
+
+                        setMidiMessage(0x80, note, velocity);
+                    } finally {
+                        mutex.release();
+                    }
+                } catch (InterruptedException e) {
+
+                }
+            }
+
+            @Override
+            public void onNoteOn(int channel, int note, int velocity) {
+                try {
+                    mutex.acquire();
+                    try {
+
+                        setMidiMessage(0x90, note, velocity);
+                    } finally {
+                        mutex.release();
+                    }
+                } catch (InterruptedException e) {
+
+                }
+            }
+        });
+
+        scrollStripView = (ScrollStripView) findViewById(R.id.ssv);
+        scrollStripView.bindKeyboard(keyboardView);
+    }
+
+    void xorView()
+    {
+        xView = 1;
         findViewById(R.id.change_view).setOnClickListener(new View.OnClickListener()
 
         {
             @Override
             public void onClick (View v){
-                if (cView == 1) {
+                if (xView == 1) {
                     findViewById(R.id.keyboard_layout).setVisibility(View.INVISIBLE);
                     findViewById(R.id.parameter_layout).setVisibility(View.VISIBLE);
 
@@ -932,16 +1071,16 @@ public class MainActivity extends AppCompatActivity
                     findViewById(R.id.keyboard_layout).setVisibility(View.VISIBLE);
                     findViewById(R.id.parameter_layout).setVisibility(View.INVISIBLE);
                 }
-                cView ^= 1;
+                xView ^= 1;
 
             }
         }
 
         );
     }
-    public void TabbedView()
+    void tabbedView()
     {
-        findViewById(R.id.mstr).setOnClickListener(new View.OnClickListener() {
+        sub_views[0].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 findViewById(R.id.mstr_layout).setVisibility(View.VISIBLE);
@@ -955,7 +1094,7 @@ public class MainActivity extends AppCompatActivity
             }
 
         });
-        findViewById(R.id.op_0).setOnClickListener(new View.OnClickListener() {
+        sub_views[1].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -972,7 +1111,7 @@ public class MainActivity extends AppCompatActivity
 
         });
 
-        findViewById(R.id.op_1).setOnClickListener(new View.OnClickListener() {
+        sub_views[2].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 findViewById(R.id.mstr_layout).setVisibility(View.INVISIBLE);
@@ -986,7 +1125,7 @@ public class MainActivity extends AppCompatActivity
             }
 
         });
-        findViewById(R.id.op_2).setOnClickListener(new View.OnClickListener() {
+        sub_views[3].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 findViewById(R.id.mstr_layout).setVisibility(View.INVISIBLE);
@@ -998,7 +1137,7 @@ public class MainActivity extends AppCompatActivity
             }
 
         });
-        findViewById(R.id.op_3).setOnClickListener(new View.OnClickListener() {
+        sub_views[4].setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 findViewById(R.id.mstr_layout).setVisibility(View.INVISIBLE);
@@ -1014,23 +1153,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    public void SetupMidi()
-    {
-
-        keyboardView.setMidiListener(new MidiListener() {
-
-            @Override
-            public void onNoteOff(int channel, int note, int velocity) {
-                setMidiMessage(0x80,  note, velocity);
-            }
-
-            @Override
-            public void onNoteOn(int channel, int note, int velocity) {
-                setMidiMessage(0x90, note, velocity);
-            }
-        });
-    }
-    public void SetupKnobs()
+    void setupKnobs()
     {
         //KNOBS//
         knobViews = new KnobView[32];
@@ -1089,7 +1212,7 @@ public class MainActivity extends AppCompatActivity
 
     }
     
-    public void SetupSeekBarsAndSwitch()
+    void setupSeekBarsAndSwitch()
     {
         seekBars = new CustomSeekBar[19];
         seekBars[0] = (CustomSeekBar) findViewById(R.id.attack_0);
@@ -1136,7 +1259,7 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void setTextViewReadOut(int id, float value)
+    void setTextViewReadOut(int id, float value)
     {
         String str = "Read Out";
         Float v;
@@ -1328,114 +1451,7 @@ public class MainActivity extends AppCompatActivity
         read.setText(str);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                    permissionGranted = true;
-
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
-            }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
-        }
-    }
-    public void checkPermissionForWrite()
-    {
-        if (ContextCompat.checkSelfPermission(this,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-                // Show an expanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }else{
-            permissionGranted = true;
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        defaultParameters();
-    }
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-    }
-    @Override
-    protected void onRestart() {
-
-        super.onRestart();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(isPlaying)
-        {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(),"Now stopped.", Toast.LENGTH_SHORT).show();
-                }
-            });
-            mPlay.setLooping(false);
-            mPlay.stop();
-            mPlay.release();
-        }
-        stopRecordJava();
-    }
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-    public void onDestroy() {
-        super.onDestroy();
-        stopProcess();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        thread = null;
-    }
-
-
-
-    public void PCMtoFile(FileOutputStream os, short[] pcmdata, int srate, int channel, int format) throws IOException {
+     void PCMtoFile(FileOutputStream os, short[] pcmdata, int srate, int channel, int format) throws IOException {
         byte[] header = new byte[44];
         byte[] data = get16BitPcm(pcmdata);
 
@@ -1492,7 +1508,7 @@ public class MainActivity extends AppCompatActivity
         os.close();
     }
 
-    public byte[] get16BitPcm(short[] data) {
+    byte[] get16BitPcm(short[] data) {
         byte[] resultData = new byte[2 * data.length];
         int iter = 0;
         for (double sample : data) {
@@ -1503,7 +1519,7 @@ public class MainActivity extends AppCompatActivity
         return resultData;
     }
 
-    public String getValuedB(float value)
+    String getValuedB(float value)
     {
         if(value > 0.0f) {
             Float string = (float) Math.log10(value) * 20.0f;

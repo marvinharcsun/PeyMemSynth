@@ -36,14 +36,7 @@ public:
         delete mLUT;
     }
 
-    inline float lerp(float phase, float buffer [], int mask)
-    {
-        int intPart = (int) phase;
-        float fracPart = phase-intPart;
-        float a = buffer[intPart & mask];
-        float b = buffer[(intPart+1) & mask];
-        return a + (b - a) * fracPart;
-    }
+
 
     inline float process(OscillatorState &oscillatorState)
     {
@@ -82,6 +75,15 @@ public:
     float  mInputAmp[4];
 
 private:
+    inline float lerp(float phase, float buffer [], int mask)
+    {
+        int intPart = (int) phase;
+        float fracPart = phase-intPart;
+        float a = buffer[intPart & mask];
+        float b = buffer[(intPart+1) & mask];
+        return a + (b - a) * fracPart;
+    }
+
     float *mLUT;
     int mLUTSize;
     int mLUTSizeM;

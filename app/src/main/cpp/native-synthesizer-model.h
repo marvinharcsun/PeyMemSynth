@@ -39,8 +39,6 @@ public:
 
         mActiveVoices = 0;
 
-        lastNote = -1;
-
         mMaster = 1.0f;
         setSampleRate(44100);
         for(int i = 0; i < 4 ; i++)
@@ -206,6 +204,48 @@ public:
     }
 
 
+    void processEvents(std::queue<MidiEvent> &events, int deltaFrames) {
+        int npos = 0;
+        while(!events.empty()) {
+            switch (events.front().message) {
+                case 0x80: //note off
+                    mNotes[npos++] = deltaFrames; //delta
+                    mNotes[npos++] = events.front().note; //note
+                    mNotes[npos++] = 0;           //vel
+                    break;
+
+                case 0x90: //note on
+                    mNotes[npos++] = deltaFrames; //delta
+                    mNotes[npos++] = events.front().note; //note
+                    mNotes[npos++] = events.front().velocity; //vel
+                    break;
+
+            }
+            if(npos>128) npos -= 3;
+            events.pop();
+        }
+
+        mNotes[npos] = EVENTS_DONE;
+
+    }
+    float mSemi[4];
+    float mFine[4];
+    float mPan[4];
+    float mOutput[4];
+    float mMaster;
+
+    float fs;
+    float port;
+    int mono;
+    int mSampleRate;
+
+    ADSR mADSR[4];
+    Oscillator mOsc[4];
+    VoiceState mVS[VOICES];
+
+
+private:
+
 
     int findFreeVoice() {
 
@@ -238,6 +278,8 @@ public:
 
         return oldestIndex;
     }
+
+
     void noteOn(int note, int velocity) {
 
         int v = 0;
@@ -327,51 +369,13 @@ public:
 
     }
 
-    void processEvenets(std::queue<MidiEvent> &events, int deltaFrames) {
-        int npos = 0;
-        while(!events.empty()) {
-            switch (events.front().message) {
-                case 0x80: //note off
-                    mNotes[npos++] = deltaFrames; //delta
-                    mNotes[npos++] = events.front().note; //note
-                    mNotes[npos++] = 0;           //vel
-                    break;
 
-                case 0x90: //note on
-                    mNotes[npos++] = deltaFrames; //delta
-                    mNotes[npos++] = events.front().note; //note
-                    mNotes[npos++] = events.front().velocity; //vel
-                    break;
-
-            }
-            if(npos>128) npos -= 3;
-            events.pop();
-        }
-
-        mNotes[npos] = EVENTS_DONE;
-
-    }
-    float mSemi[4];
-    float mFine[4];
-    float mPan[4];
-    float mOutput[4];
-    float mMaster;
-    ADSR mADSR[4];
-    Oscillator mOsc[4];
-    VoiceState mVS[VOICES];
+    float mOperator[4];
     float lastValues[4];
     float lastPhases[4];
-    ADSRStage lastStages[4];
-    int mono;
-    int mSampleRate;
-    float fs;
-    float port;
-
-private:
     int mNotes[128];
     int mActiveVoices;
-    float mOperator[4];
-    int lastNote;
+    ADSRStage lastStages[4];
     int xorVoice;
 };
 

@@ -19,3 +19,7 @@
 1048	1279	0	../obj/x86/libnative-synthesizer-thread.so	17fd7127348b99d1
 16	5543	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	a57ada49c6ac01f1
 5543	6142	0	../obj/x86/libnative-synthesizer-thread.so	17fd7127348b99d1
+356	24565	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	a57ada49c6ac01f1
+24597	27667	0	../obj/x86/libnative-synthesizer-thread.so	17fd7127348b99d1
+41	4073	0	CMakeFiles/native-synthesizer-thread.dir/src/main/cpp/native-synthesizer-thread.cpp.o	a57ada49c6ac01f1
+4073	4954	0	../obj/x86/libnative-synthesizer-thread.so	17fd7127348b99d1

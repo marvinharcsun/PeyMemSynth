@@ -1,6 +1,3 @@
-//
-// Created by Marvin on 11/3/2016.
-//
 
 #ifndef SYNTHESIZERAPP_NATIVE_ADSR1_H
 #define SYNTHESIZERAPP_NATIVE_ADSR1_H

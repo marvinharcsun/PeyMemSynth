@@ -365,14 +365,13 @@ void destroyThreadLock(void *lock)
 /////////////////////////////////////OPEN_SL_DONE
 
 static int on;
-std::queue<MidiEvent> events;
-#include <mutex>
-std::mutex mutex;
-
 bool isRecording;
 bool isStopped;
-std::queue<float> recordedData;
 float params[52];
+std::queue<float> recordedData;
+std::queue<MidiEvent> events;
+
+
 extern "C"
 {
 JNIEXPORT void JNICALL
@@ -398,7 +397,6 @@ JNIEXPORT jshortArray JNICALL
 
 }
 
-float FramesForPortamento = 0.f;
 JNIEXPORT void JNICALL Java_com_group3_synthesizerapp_MainActivity_startProcess(JNIEnv* , jobject ,jint sampleRate, jint frames) {
     OPENSL_STREAM  *p;
     float outbuffer[frames];
@@ -410,7 +408,6 @@ JNIEXPORT void JNICALL Java_com_group3_synthesizerapp_MainActivity_startProcess(
     isStopped = false;
     if(p == NULL) return;
     on = 1;
-    FramesForPortamento = frames;
     int f = 32;
     while(on)
     {
@@ -420,7 +417,7 @@ JNIEXPORT void JNICALL Java_com_group3_synthesizerapp_MainActivity_startProcess(
             if (f % i == 0)
             {
 
-                synthesizerModel->processEvenets(events, 0);
+                synthesizerModel->processEvents(events, 0);
                 synthesizerModel->processReplacing(outbuffer, f);
 
                 if (isRecording)
@@ -448,12 +445,12 @@ JNIEXPORT void JNICALL Java_com_group3_synthesizerapp_MainActivity_startProcess(
 JNIEXPORT void JNICALL
         Java_com_group3_synthesizerapp_MainActivity_setRecord(JNIEnv* ,jobject ,jboolean jboolean1)
 {
-    isRecording = jboolean1;
+    isRecording = true;
 }
 JNIEXPORT void JNICALL
         Java_com_group3_synthesizerapp_MainActivity_setStopped(JNIEnv* ,jobject ,jboolean jboolean1)
 {
-    isStopped = jboolean1;
+    isStopped = true;
 }
 JNIEXPORT jshortArray JNICALL
         Java_com_group3_synthesizerapp_MainActivity_getRecordedData(JNIEnv* env,jobject)
